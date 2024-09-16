@@ -35,7 +35,9 @@ public interface ServiceBasic {
             int startYear,int endYear
     );
     List<StudentImage> getStudentImages(Long studentId);
-
+    StudentImage getStudentImageById(Long id);
     StudentImage saveStudentImage(Long id, StudentImageDto studentImage);
+
+    void removeStudentImage(Long id);
 }
 

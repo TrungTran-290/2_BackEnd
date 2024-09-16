@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface StudentImageRepo extends JpaRepository<StudentImage, Long> {
     List<StudentImage> findByStudentId(Long id);
+
 //    List<StudentImage> getStudentImages(Long studentId);
 }

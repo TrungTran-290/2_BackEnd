@@ -11,18 +11,22 @@ import com.example.thu2_springio.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.service.invoker.UrlArgumentResolver;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -218,7 +222,7 @@ public class StudentController {
     }
 
     @GetMapping("/getimage/{id}")
-    public ResponseEntity<?> getStudentImage(@RequestParam Long studentId) {
+    public ResponseEntity<?> getStudentImage(@PathVariable("id") Long studentId) {
         List<StudentImage> studentImages = service.getStudentImages(studentId);
         if (studentImages.isEmpty()) {
             ApiResponse apiResponse = ApiResponse.builder()
@@ -336,5 +340,45 @@ public class StudentController {
         Path filePath = Paths.get(uploadDir.toString(),uniqueFileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         return uniqueFileName;
+    }
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<?> getStudentImage(@PathVariable("imageName") String imageName) {
+        try {
+            Path filePath = Paths.get("upload/"+imageName);
+            UrlResource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+            }
+            else {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(new UrlResource(Paths.get("uploads/notfound.jpeg").toUri()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/deleteimage/{id}")
+    public ResponseEntity<?> deleteStudentImage(@PathVariable Long id) {
+//         StudentImage image = service.getStudentImageById(id);
+//         if(image==null){
+//             ApiResponse apiResponse = ApiResponse.builder()
+//                     .data(null)
+//                     .message("not found")
+//                     .status(HttpStatus.NOT_FOUND.value())
+//                     .build();
+//             return ResponseEntity.badRequest().body(apiResponse);
+//         }
+         service.removeStudentImage(id);
+         ApiResponse apiResponse = ApiResponse.builder()
+                 .data(id)
+                 .message("delete successful")
+                 .status(HttpStatus.OK.value())
+                 .build();
+         return ResponseEntity.ok(apiResponse);
     }
 }

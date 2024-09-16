@@ -101,6 +101,11 @@ public class StudentService implements ServiceBasic{
     }
 
     @Override
+    public StudentImage getStudentImageById(Long id) {
+        return imageRepo.findById(id).orElse(null);
+    }
+
+    @Override
     public StudentImage saveStudentImage(Long id, StudentImageDto studentImage) {
         Student student = getStudentById(id);
         StudentImage image = StudentImage.builder()
@@ -112,6 +117,11 @@ public class StudentService implements ServiceBasic{
             throw new InvalidParameterException("Max 4 Hinh");
         }
         return imageRepo.save(image);
+    }
+
+    @Override
+    public void removeStudentImage(Long id) {
+        imageRepo.deleteById(id);
     }
 
 }
